@@ -111,6 +111,7 @@ func (c *connection) readPump() {
 		c.userinfo.User = dat.User
 		c.userinfo.U_x = dat.U_x
 		c.userinfo.U_y = dat.U_y
+		c.userinfo.Status = dat.Status
 
 		HubHandler.broadcast <- message
 	}
