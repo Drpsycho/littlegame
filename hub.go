@@ -33,21 +33,27 @@ func (h *hub) run() {
 		select {
 		case c := <-h.register:
 			h.connections[c] = true
+			c.send <- GetStageJSON()
 
 			for m := range h.connections {
-				if m.userinfo.User != "" {
-					log.Println("User ", m.userinfo.User, " ", m.userinfo.U_x, " ", m.userinfo.U_y)
-					res, _ := json.Marshal(m.userinfo)
+				if m.userinfo.Name != "" {
+					res, _ := json.Marshal(inputmsg{
+						Name:   m.userinfo.Name,
+						Action: "addplayer",
+						Data:   inputmsgData{Dx: m.userinfo.Data.Dx, Dy: m.userinfo.Data.Dy},
+					})
 					c.send <- res
 				}
-
 			}
-			log.Println("")
 
 		case c := <-h.unregister:
 			c.userinfo.Status = false
-			byebye, _ := json.Marshal(c.userinfo)
-			log.Println("User ", c.userinfo.User, " removed !")
+			byebye, _ := json.Marshal(inputmsg{
+				Name:   c.userinfo.Name,
+				Action: "removeplayer",
+			})
+
+			log.Println("User ", c.userinfo.Name, " removed !")
 
 			if _, ok := h.connections[c]; ok {
 				delete(h.connections, c)
