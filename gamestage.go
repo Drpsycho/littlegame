@@ -40,7 +40,7 @@ const (
 	ItemAmount    = 40
 	ItemSpriteMax = 35
 	X_max         = 32 * 30
-	Y_max         = 200 //32 * 30
+	Y_max         = 32 * 30
 
 	FruitWidth  = 20
 	FruitHeight = 20
@@ -101,7 +101,7 @@ func fillStage() {
 		_width := FruitWidth
 		_heigth := FruitHeight
 		_x := r.Intn(X_max-(64+FruitWidth)) + 32
-		_y := r.Intn(Y_max-(64+FruitWidth)) + 32
+		_y := r.Intn(200-(64+FruitWidth)) + 32
 
 		items = append(items, stageitem{
 			Item:     r.Intn(ItemSpriteMax),
