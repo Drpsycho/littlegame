@@ -9,6 +9,7 @@ import (
 )
 
 var addr = flag.String("addr", "localhost:8080", "http service address")
+var json_map = flag.String("map", "./map.json", "json map for game")
 
 // var workdir = flag.String("workdir", "./", "work dir")
 
@@ -37,7 +38,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 
-	ParseMap()
+	ParseMap(*json_map)
 	FillTileMap()
 
 	// homeTempl = template.Must(template.ParseFiles(*workdir + "/sandbox.html"))

@@ -62,9 +62,9 @@ type TilesetsObj struct {
 	tilewidth   int
 }
 
-func ParseMap() {
+func ParseMap(_path string) {
 
-	file, e := ioutil.ReadFile("/home/drpsycho/js/jsgame/stuff/sprites/map.json")
+	file, e := ioutil.ReadFile(_path)
 	if e != nil {
 		fmt.Printf("File error: %v\n", e)
 		os.Exit(1)
