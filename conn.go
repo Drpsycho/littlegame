@@ -35,6 +35,12 @@ type inputmsg struct {
 	Status bool
 }
 
+type actionmsg struct {
+	In inputmsg
+	Dx *int
+	Dy *int
+}
+
 // connection is an middleman between the websocket connection and the hub.
 type connection struct {
 	// The websocket connection.
@@ -134,76 +140,54 @@ func (c *connection) readPump() {
 					m.send <- res
 				}
 			}
+
+			for m := range HubHandler.connections {
+				if m.userinfo.Name != c.userinfo.Name {
+					res, _ := json.Marshal(inputmsg{
+						Name:   m.userinfo.Name,
+						Action: "addplayer",
+						Data:   inputmsgData{Dx: m.userinfo.Data.Dx, Dy: m.userinfo.Data.Dy},
+					})
+					log.Println("User ", m.userinfo.Name, " send to ", c.userinfo.Name)
+					c.send <- res
+				}
+			}
 		}
 
 		if dat.Action != "" {
-			Action <- dat
+			Action <- actionmsg{
+				In: dat,
+				Dx: &c.userinfo.Data.Dx,
+				Dy: &c.userinfo.Data.Dy,
+			}
 		}
 	}
 }
 
-var Action = make(chan inputmsg, 100)
+var Action = make(chan actionmsg, 100)
 
 func ActionHandler() {
 	for {
 		_a := <-Action
 
-		if _a.Action == "move" {
+		if _a.In.Action == "move" {
 			collision(&_a)
 
 			res, _ := json.Marshal(inputmsg{
-				Name:   _a.Name,
+				Name:   _a.In.Name,
 				Action: "moveplayer",
-				Data:   inputmsgData{Dx: _a.Data.Dx, Dy: _a.Data.Dy},
+				Data:   inputmsgData{Dx: _a.In.Data.Dx, Dy: _a.In.Data.Dy},
 			})
 
 			HubHandler.broadcast <- res
 			//send to move handler
 		}
-		if _a.Action == "setbomb" {
+		if _a.In.Action == "setbomb" {
 			//send to bombs handler
 		}
-		if _a.Action == "setname" {
+		if _a.In.Action == "setname" {
 			//set name
 		}
 
 	}
-}
-
-func collisionItem(it stageitem, pl inputmsgData) bool {
-	//witdh/2 Height/2
-	//----  10
-	//|  |10	20
-	//----	20
-	if pl.Dx > it.HitBox.Left &&
-		pl.Dx < it.HitBox.Right &&
-		pl.Dy > it.HitBox.Top &&
-		pl.Dy < it.HitBox.Bottom {
-		return true
-	} else {
-		return false
-	}
-}
-
-func collision(d *inputmsg) {
-
-	if d.Data.Dx < 0 {
-		d.Data.Dx = 0
-	} else if d.Data.Dx > X_max {
-		d.Data.Dx = X_max
-	}
-	if d.Data.Dy < 0 {
-		d.Data.Dy = 0
-	} else if d.Data.Dy > Y_max {
-		d.Data.Dy = Y_max
-	}
-	for it := range items {
-		if collisionItem(items[it], d.Data) {
-			removeitem <- removeitemstruct{Name: d.Name, Id: items[it].GlobalId}
-		}
-	}
-}
-
-func hit(it *stageitem, dat *inputmsgData) {
-
 }

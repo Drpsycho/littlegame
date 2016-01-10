@@ -2,17 +2,17 @@ package main
 
 import (
 	"encoding/json"
-	"log"
+	// "log"
 	"math/rand"
 	"time"
 )
 
 // addItem(msg.WorldX, msg.WorldY, msg.Item, msg.GlobalId);
 type hitbox struct {
-	Top    int
-	Bottom int
-	Left   int
-	Right  int
+	LeftX  int
+	RightX int
+	LeftY  int
+	RightY int
 }
 
 type stageitem struct {
@@ -37,10 +37,10 @@ type stagemsg struct {
 }
 
 const (
-	ItemAmount = 100
-	ItemMax    = 35
-	X_max      = 1900
-	Y_max      = 1900
+	ItemAmount    = 40
+	ItemSpriteMax = 35
+	X_max         = 32 * 30
+	Y_max         = 200 //32 * 30
 
 	FruitWidth  = 20
 	FruitHeight = 20
@@ -59,9 +59,10 @@ func StageUpdater() {
 	for {
 		if !(len(items) > 0) {
 			fillStage()
+			HubHandler.broadcast <- GetStageJSON()
 		}
-		_item := <-removeitem
 
+		_item := <-removeitem
 		idremove := 0
 		approveremove := false
 
@@ -99,23 +100,23 @@ func fillStage() {
 	for i := 0; i < ItemAmount; i++ {
 		_width := FruitWidth
 		_heigth := FruitHeight
-		_x := r.Intn(X_max)
-		_y := r.Intn(Y_max)
+		_x := r.Intn(X_max-(64+FruitWidth)) + 32
+		_y := r.Intn(Y_max-(64+FruitWidth)) + 32
 
 		items = append(items, stageitem{
-			Item:     r.Intn(ItemMax),
+			Item:     r.Intn(ItemSpriteMax),
 			WorldX:   _x,
 			WorldY:   _y,
 			Witdh:    _width,
 			Height:   _heigth,
 			GlobalId: i,
 			HitBox: hitbox{
-				Top:    (_y - _heigth/2),
-				Bottom: (_y + _heigth/2),
-				Left:   (_x - _width/2),
-				Right:  (_x + _width/2),
+				LeftX:  (_x),
+				LeftY:  (_y),
+				RightX: (_x + _heigth),
+				RightY: (_y + _width),
 			},
 			Name: "fruitnveg"})
-		log.Println("Added item ", items[i])
+		// log.Println("Added item ", items[i])
 	}
 }

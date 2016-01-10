@@ -35,17 +35,6 @@ func (h *hub) run() {
 			h.connections[c] = true
 			c.send <- GetStageJSON()
 
-			for m := range h.connections {
-				if m.userinfo.Name != "" {
-					res, _ := json.Marshal(inputmsg{
-						Name:   m.userinfo.Name,
-						Action: "addplayer",
-						Data:   inputmsgData{Dx: m.userinfo.Data.Dx, Dy: m.userinfo.Data.Dy},
-					})
-					c.send <- res
-				}
-			}
-
 		case c := <-h.unregister:
 			c.userinfo.Status = false
 			byebye, _ := json.Marshal(inputmsg{

@@ -37,6 +37,9 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 
+	ParseMap()
+	FillTileMap()
+
 	// homeTempl = template.Must(template.ParseFiles(*workdir + "/sandbox.html"))
 	go HubHandler.run()
 	go StageUpdater()
